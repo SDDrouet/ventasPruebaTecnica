@@ -1,3 +1,18 @@
 spring:
   application:
     name: ventas
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://localhost:5432/ventas_db
+    username: postgres
+    password: postgres
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    database: postgresql
+    show-sql: false
+
+server:
+  servlet:
+    context-path: /api
