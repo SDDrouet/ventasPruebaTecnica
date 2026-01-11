@@ -7,29 +7,50 @@ import com.supermercado.ventas.entity.Producto;
 import com.supermercado.ventas.mapper.ProductoMapper;
 import com.supermercado.ventas.service.ProductService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/productos")
 @RequiredArgsConstructor
 public class ProductController {
     private final ProductService productService;
-    private final ProductoMapper productoMapper;
 
     @GetMapping
-    ResponseEntity<ApiResponse<List<ProductoResponse>>> obtenerProductos() {
-        List<ProductoResponse> res = productService.obtenerProductos().stream().map(productoMapper::entityToResponse).toList();
+    ResponseEntity<ApiResponse<Page<ProductoResponse>>> obtenerProductos(@PageableDefault Pageable pageable) {
+        Page<ProductoResponse> res = productService.obtenerProductos(pageable)
+                            .map(ProductoMapper::entityToResponse);
         return ResponseEntity.ok(ApiResponse.ok(res));
     }
 
     @PostMapping
     ResponseEntity<ApiResponse<ProductoResponse>> crearProducto(@Validated @RequestBody ProductoRequest productoRequest) {
-        Producto producto = productoMapper.requestToEntity(productoRequest);
-        ProductoResponse res = productoMapper.entityToResponse(productService.crearProducto(producto));
+        Producto producto = ProductoMapper.requestToEntity(productoRequest);
+        ProductoResponse res = ProductoMapper.entityToResponse(productService.crearProducto(producto));
         return ResponseEntity.ok(ApiResponse.ok("Producto creado con éxito", res));
+    }
+
+    @PutMapping("/{id}")
+    ResponseEntity<ApiResponse<ProductoResponse>> actualizarProducto(@PathVariable Long id,
+                                                                     @Validated @RequestBody ProductoRequest productoResquest) {
+        Producto nuevoProducto = ProductoMapper.requestToEntity(productoResquest);
+        ProductoResponse res = ProductoMapper.entityToResponse(productService.actualizarProducto(nuevoProducto, id));
+        return ResponseEntity.ok(ApiResponse.ok(
+                "Producto actualizado con éxito",
+                res
+        ));
+    }
+
+    @DeleteMapping("/{id}")
+    ResponseEntity<ApiResponse<Boolean>> eliminarProducto(@PathVariable Long id) {
+        Boolean productoEliminado = productService.eliminarProducto(id);
+        return ResponseEntity.ok(ApiResponse.ok(
+                "Producto eliminado",
+                productoEliminado
+        ));
     }
 }

@@ -11,7 +11,7 @@ import java.math.BigDecimal;
 @Builder
 @Getter
 @AllArgsConstructor
-public class ProductoRequest{
+public class ProductoRequest {
         @NotBlank String nombre;
         @DecimalMin("0.01") BigDecimal precio;
         @NotBlank String categoria;
